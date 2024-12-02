@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Patient History</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>History for Patient: <span th:text="${patient.name}"></span></h2>
+
+    <!-- Table displaying admission/discharge history -->
+    <table class="table table-striped mt-4">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Reason</th>
+            <th>Diagnosis</th>
+            <th>Admission Method</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="history : ${admissionDischargeHistory}">
+            <td th:text="${history.date}"></td>
+            <td th:text="${history.reason}"></td>
+            <td th:text="${history.diagnosis}"></td>
+            <td th:text="${history.admissionMethod}"></td>
+            <td>
+                <a th:href="@{/patients/patient-history/{patientId}/edit/{historyId}(patientId=${patient.id}, historyId=${history.id})}" class="btn btn-primary btn-sm">Edit</a>
+                <a th:href="@{/patients/patient-history/{patientId}/delete/{historyId}(patientId=${patient.id}, historyId=${history.id})}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('Are you sure you want to delete this entry?');">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Button to open modal for adding new history entry or transfer -->
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEntryModal">Add Entry or Transfer</button>
+
+    <!-- Modal with a single form for admission/discharge or transfer -->
+    <div class="modal fade" id="addEntryModal" tabindex="-1" aria-labelledby="addEntryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/patients/patient-history/{id}/add_history(id=${patient.id})}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addEntryModalLabel">Add Admission/Discharge or Transfer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Tabs for toggling between Admission/Discharge and Transfer fields -->
+                        <ul class="nav nav-tabs" id="entryTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="true">Admission/Discharge</button>
+                            </li>
+                            <li class="nav-item" role="presentation" id="transfer-tab-item">
+                                <button class="nav-link" id="transfer-tab" data-bs-toggle="tab" data-bs-target="#transfer" type="button" role="tab" aria-controls="transfer" aria-selected="false">Transfer</button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab content for admission/discharge and transfer fields -->
+                        <div class="tab-content mt-3" id="entryTabsContent">
+                            <!-- Admission/Discharge Fields -->
+                            <div class="tab-pane fade show active" id="history" role="tabpanel" aria-labelledby="history-tab">
+                                <input type="hidden" name="patientId" th:value="${patient.id}"/>
+
+                                <div class="mb-3">
+                                    <label for="date" class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="date" name="date" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="reason" class="form-label">Reason</label>
+                                    <select class="form-control" id="reason" name="reason" required>
+                                        <option th:if="${readyToAdmit}" value="ADMISSION">Admission</option>
+                                        <option th:unless="${readyToAdmit}" value="DISCHARGE">Discharge</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="diagnosis" class="form-label">Diagnosis</label>
+                                    <input type="text" class="form-control" id="diagnosis" name="diagnosis" required>
+                                </div>
+                                <div class="mb-3" id="admissionMethodDiv">
+                                    <label for="admissionMethod" class="form-label">Reason</label>
+                                    <select class="form-control" id="admissionMethod" name="admissionMethod">
+                                        <option value="AMBULANCE">AMBULANCE</option>
+                                        <option value="REFERRAL">REFERRAL</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Transfer Fields -->
+                            <div class="tab-pane fade" id="transfer" role="tabpanel" aria-labelledby="transfer-tab">
+                                <input type="hidden" id="transferDate" name="date" th:value="${date}" />
+                                <div class="mb-3">
+                                    <label for="ward" class="form-label">Select Ward</label>
+                                    <select class="form-control" id="ward" name="wardId" required>
+                                        <option th:each="ward : ${wards}" th:value="${ward.id}" th:text="${ward.number}"></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const reasonSelect = document.getElementById("reason");
+        const admissionMethodDiv = document.getElementById("admissionMethodDiv");
+        const transferTabItem = document.getElementById("transfer-tab-item");
+
+        function toggleAdmissionMethod() {
+            if (reasonSelect.value === "DISCHARGE") {
+                transferTabItem.style.display = "none";
+                admissionMethodDiv.style.display = "none";  // Hide admission method
+                document.getElementById("admissionMethod").value = "";  // Clear its value
+            } else {
+                admissionMethodDiv.style.display = "block"; // Show admission method
+            }
+        }
+
+        reasonSelect.addEventListener("change", toggleAdmissionMethod);
+        toggleAdmissionMethod(); // Initial call to set the correct state on page load
+    });
+</script>
+
+</body>
+</html>

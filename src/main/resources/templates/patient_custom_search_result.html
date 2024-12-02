@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Search Results</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+
+<div class="container">
+    <h1 class="my-4">Search Results</h1>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col" th:if="${#lists.size(customQueryResult) > 0 && customQueryResult[0].wardNumber != null}">Ward Number</th>
+            <th scope="col" th:if="${#lists.size(customQueryResult) > 0 && customQueryResult[0].phone != null}">Phone</th>
+            <th scope="col" th:if="${#lists.size(customQueryResult) > 0 && customQueryResult[0].age != null}">Age</th>
+            <th scope="col" th:if="${#lists.size(customQueryResult) > 0 && customQueryResult[0].admissionDate != null}">Admission Date</th>
+            <th scope="col" th:if="${#lists.size(customQueryResult) > 0 && customQueryResult[0].transferDate != null}">Transfer Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Iterate over the custom query results -->
+        <tr th:each="patient : ${customQueryResult}">
+            <td th:text="${patient.patientName}"></td>
+            <td th:if="${patient.wardNumber != null}" th:text="${patient.wardNumber}"></td>
+            <td th:if="${patient.phone != null}" th:text="${patient.phone}"></td>
+            <td th:if="${patient.age != null}" th:text="${patient.age}"></td>
+            <td th:if="${patient.admissionDate != null}" th:text="${patient.admissionDate}"></td>
+            <td th:if="${patient.transferDate != null}" th:text="${patient.transferDate}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/patients}" class="btn btn-primary">Back to Patients List</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

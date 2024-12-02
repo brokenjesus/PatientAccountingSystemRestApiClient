@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Ward</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <h1 class="my-4">Edit Ward</h1>
+
+    <form action="#" th:action="@{/wards/edit-ward/{id}(id=${ward.id})}" th:object="${ward}" method="post">
+        <div class="mb-3">
+            <label for="phone" class="form-label">Phone</label>
+            <input type="text" th:field="*{phone}" class="form-control" id="phone" required>
+        </div>
+        <div class="mb-3">
+            <label for="bed_places" class="form-label">Bed Places</label>
+            <input type="text" th:field="*{bedPlaceCount}" class="form-control" id="bed_places" placeholder="Enter bed places count" required>
+        </div>
+        <div class="mb-3">
+            <label for="number" class="form-label">Ward Number</label>
+            <input type="text" th:field="*{number}" class="form-control" id="number" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Ward</button>
+    </form>
+</div>
+</body>
+</html>
